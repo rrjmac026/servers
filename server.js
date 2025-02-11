@@ -5,8 +5,6 @@ require("dotenv").config();
 
 const app = express();
 
-const db = admin.firestore();
-
 // Middleware
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -22,21 +20,8 @@ if (process.env.FIREBASE_CREDENTIALS) {
     process.exit(1); // Stop execution if the JSON is invalid
   }
 } else {
-  serviceAccount = require("./ServiceKey.json"); // Use local file for local development
+  serviceAccount = require("./ServiceKey.json"); // Use local file for development
 }
-
-  async function testFirestore() {
-    const studentsRef = db.collection("students");
-    const snapshot = await studentsRef.get();
-    if (snapshot.empty) {
-      console.log("❌ No students found in Firestore");
-    } else {
-      snapshot.forEach((doc) => console.log(doc.id, "=>", doc.data()));
-    }
-  }
-
-testFirestore();
-
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -44,7 +29,25 @@ admin.initializeApp({
 
 const db = admin.firestore(); // Firestore database instance
 
-// Fetch all students from Firestore
+// 🔍 Test Firestore Connection AFTER Initialization
+async function testFirestore() {
+  try {
+    const studentsRef = db.collection("students");
+    const snapshot = await studentsRef.get();
+    if (snapshot.empty) {
+      console.log("❌ No students found in Firestore");
+    } else {
+      console.log("✅ Firestore Connected. Students List:");
+      snapshot.forEach((doc) => console.log(doc.id, "=>", doc.data()));
+    }
+  } catch (error) {
+    console.error("❌ Error connecting to Firestore:", error);
+  }
+}
+
+testFirestore();
+
+// 📌 Fetch all students from Firestore
 app.get("/students", async (req, res) => {
   try {
     const studentsRef = db.collection("students");
@@ -66,7 +69,7 @@ app.get("/students", async (req, res) => {
   }
 });
 
-// Start the server
+// 🚀 Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
