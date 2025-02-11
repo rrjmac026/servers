@@ -5,6 +5,8 @@ require("dotenv").config();
 
 const app = express();
 
+const db = admin.firestore();
+
 // Middleware
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -22,6 +24,19 @@ if (process.env.FIREBASE_CREDENTIALS) {
 } else {
   serviceAccount = require("./ServiceKey.json"); // Use local file for local development
 }
+
+  async function testFirestore() {
+    const studentsRef = db.collection("students");
+    const snapshot = await studentsRef.get();
+    if (snapshot.empty) {
+      console.log("❌ No students found in Firestore");
+    } else {
+      snapshot.forEach((doc) => console.log(doc.id, "=>", doc.data()));
+    }
+  }
+
+testFirestore();
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
