@@ -16,7 +16,7 @@ if (process.env.FIREBASE_CREDENTIALS) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
   } catch (error) {
-    console.error("Error parsing FIREBASE_CREDENTIALS:", error);
+    console.error("❌ Error parsing FIREBASE_CREDENTIALS:", error);
     process.exit(1); // Stop execution if the JSON is invalid
   }
 } else {
@@ -29,11 +29,12 @@ admin.initializeApp({
 
 const db = admin.firestore(); // Firestore database instance
 
-// 🔍 Test Firestore Connection AFTER Initialization
+// 🔍 Test Firestore Connection
 async function testFirestore() {
   try {
     const studentsRef = db.collection("students");
     const snapshot = await studentsRef.get();
+    
     if (snapshot.empty) {
       console.log("❌ No students found in Firestore");
     } else {
@@ -45,7 +46,7 @@ async function testFirestore() {
   }
 }
 
-testFirestore();
+testFirestore(); // ✅ Now it's after Firebase initialization
 
 // 📌 Fetch all students from Firestore
 app.get("/students", async (req, res) => {
@@ -64,7 +65,7 @@ app.get("/students", async (req, res) => {
 
     res.status(200).json(students);
   } catch (error) {
-    console.error("Error fetching students:", error);
+    console.error("❌ Error fetching students:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
