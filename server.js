@@ -6,16 +6,21 @@ require("dotenv").config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 // Initialize Firebase Admin SDK
 let serviceAccount;
 
 if (process.env.FIREBASE_CREDENTIALS) {
-  serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+  } catch (error) {
+    console.error("Error parsing FIREBASE_CREDENTIALS:", error);
+    process.exit(1); // Stop execution if the JSON is invalid
+  }
 } else {
-  serviceAccount = require("./ServiceKey.json"); // Use local file if env variable is not set
+  serviceAccount = require("./ServiceKey.json"); // Use local file for local development
 }
 
 admin.initializeApp({
